@@ -1,6 +1,7 @@
-"""Shared code for the unimodal hateful-meme baselines. 
+"""Shared code for the unimodal hateful-meme baselines.
 Both me and Jakob import this file so that the classifier, training loop, evaluation and seeds are identical across all four experiments.
 """
+
 import itertools
 import json
 import os
@@ -12,9 +13,16 @@ import torch.nn as nn
 from sklearn.metrics import roc_auc_score
 
 from PIL import Image
-from transformers import AutoImageProcessor, AutoModel, CLIPModel, AutoModel, AutoTokenizer
+from transformers import (
+    AutoImageProcessor,
+    AutoModel,
+    CLIPModel,
+    AutoModel,
+    AutoTokenizer,
+)
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 # ----------------------------------------------------------------- DATA LOADING
 def load_split(data_dir, name):
@@ -25,6 +33,7 @@ def load_split(data_dir, name):
             rows.append(json.loads(line))
     return rows
 
+
 def describe_splits(data_dir, names=("train", "dev", "test")):
     """Prints split sizes and class counts (if the labels exist)."""
     for n in names:
@@ -32,18 +41,23 @@ def describe_splits(data_dir, names=("train", "dev", "test")):
         labels = [r["label"] for r in rows if "label" in r]
         if labels:
             pos = int(sum(labels))
-            print(f"{n}: {len(rows)} examples | hateful=1: {pos} | non-hateful=0: {len(labels) - pos}")
+            print(
+                f"{n}: {len(rows)} examples | hateful=1: {pos} | non-hateful=0: {len(labels) - pos}"
+            )
         else:
             print(f"{n}: {len(rows)} examples | no labels")
 
+
 def get_labels(rows):
     return np.array([r["label"] for r in rows], dtype=np.float32)
+
 
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+
 
 # ------------------------------------------------------- EXTRACTING EMBEDDINGS
 @torch.no_grad()
@@ -106,6 +120,7 @@ def extract_text_embeddings(
 # ------------------------------------------------------------ CLASSIFIER
 class LinearProbe(nn.Module):
     """Single linear layer, one output logit. Only in_dim changes."""
+
     def __init__(self, in_dim):
         super().__init__()
         self.fc = nn.Linear(in_dim, 1)
@@ -125,7 +140,10 @@ def predict_scores(model, X, batch_size=1024):
     """Sigmoid of the logit = hateful-class score in [0, 1]."""
     model.eval()
     X = torch.as_tensor(X, dtype=torch.float32)
-    s = [torch.sigmoid(model(X[i:i + batch_size].to(DEVICE))).cpu() for i in range(0, len(X), batch_size)]
+    s = [
+        torch.sigmoid(model(X[i : i + batch_size].to(DEVICE))).cpu()
+        for i in range(0, len(X), batch_size)
+    ]
     return torch.cat(s).numpy()
 
 
@@ -149,7 +167,7 @@ def train_linear(Xtr, ytr, Xva, yva, lr, wd, bs, epochs=100, seed=0, patience=15
         model.train()
         perm = torch.randperm(len(Xtr_t), generator=g)
         for i in range(0, len(perm), bs):
-            idx = perm[i:i + bs]
+            idx = perm[i : i + bs]
             opt.zero_grad()
             loss = loss_fn(model(Xtr_t[idx].to(DEVICE)), ytr_t[idx].to(DEVICE))
             loss.backward()
@@ -157,7 +175,9 @@ def train_linear(Xtr, ytr, Xva, yva, lr, wd, bs, epochs=100, seed=0, patience=15
         val = auroc(yva, predict_scores(model, Xva))
         if val > best:
             best, best_ep, bad = val, ep, 0
-            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            best_state = {
+                k: v.detach().cpu().clone() for k, v in model.state_dict().items()
+            }
         else:
             bad += 1
             if bad >= patience:
@@ -169,8 +189,12 @@ def grid_search(Xtr, ytr, Xva, yva, grid, seed=0, epochs=100):
     """Same grid for every experiment. Selection by validation AUROC."""
     results = []
     for lr, wd, bs in itertools.product(grid["lr"], grid["wd"], grid["bs"]):
-        _, val, ep = train_linear(Xtr, ytr, Xva, yva, lr, wd, bs, epochs=epochs, seed=seed)
-        results.append({"lr": lr, "wd": wd, "bs": bs, "val_auroc": val, "best_epoch": ep})
+        _, val, ep = train_linear(
+            Xtr, ytr, Xva, yva, lr, wd, bs, epochs=epochs, seed=seed
+        )
+        results.append(
+            {"lr": lr, "wd": wd, "bs": bs, "val_auroc": val, "best_epoch": ep}
+        )
     results.sort(key=lambda r: -r["val_auroc"])
     return results
 
@@ -180,7 +204,17 @@ def final_runs(Xtr, ytr, Xva, yva, Xte, yte, best, seeds, epochs=100):
     Returns per-seed val/test AUROC (test only if yte is not None) and scores of seed seeds[0]."""
     per_seed, first = [], None
     for s in seeds:
-        state, val, ep = train_linear(Xtr, ytr, Xva, yva, best["lr"], best["wd"], best["bs"], epochs=epochs, seed=s)
+        state, val, ep = train_linear(
+            Xtr,
+            ytr,
+            Xva,
+            yva,
+            best["lr"],
+            best["wd"],
+            best["bs"],
+            epochs=epochs,
+            seed=s,
+        )
         model = LinearProbe(Xtr.shape[1]).to(DEVICE)
         model.load_state_dict(state)
         row = {"seed": s, "val_auroc": val, "best_epoch": ep}
