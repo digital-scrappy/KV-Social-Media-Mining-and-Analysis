@@ -1,5 +1,5 @@
 {
-  "EXP_NAME": "image_A",
+  "EXP_NAME": "image_clip32",
   "MODALITY": "image",
   "MODEL_NAME": "openai/clip-vit-base-patch32",
   "IMG_KIND": "clip",
