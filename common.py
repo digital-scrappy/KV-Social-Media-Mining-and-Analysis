@@ -52,29 +52,47 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
              'cls'  -> AutoModel last_hidden_state[:, 0] (CLS token, e.g. DINOv2 768-d)
     Image pixels only; the processor does the required resize + normalization."""
     proc = AutoImageProcessor.from_pretrained(model_name)
-    model = (CLIPModel if kind == "clip" else AutoModel).from_pretrained(model_name).to(DEVICE).eval()
+    model = (
+        (CLIPModel if kind == "clip" else AutoModel)
+        .from_pretrained(model_name)
+        .to(DEVICE)
+        .eval()
+    )
     out = []
     for i in range(0, len(rows), batch_size):
-        imgs = [Image.open(os.path.join(data_dir, r["img"])).convert("RGB") for r in rows[i:i + batch_size]]
+        imgs = [
+            Image.open(os.path.join(data_dir, r["img"])).convert("RGB")
+            for r in rows[i : i + batch_size]
+        ]
         inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
         if kind == "clip":
             emb = model.get_image_features(**inputs)
         else:
             emb = model(**inputs).last_hidden_state[:, 0]
+        if not isinstance(emb, torch.Tensor):
+            emb = emb.pooler_output
         out.append(emb.float().cpu())
     return torch.cat(out).numpy()
 
 
 @torch.no_grad()
-def extract_text_embeddings(rows, model_name, pooling="mean", max_len=128, batch_size=64):
+def extract_text_embeddings(
+    rows, model_name, pooling="mean", max_len=128, batch_size=64
+):
     """pooling: 'mean' (attention-masked mean of last hidden state) or 'cls'.
     Truncation to max_len tokens; meme text only."""
     tok = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name).to(DEVICE).eval()
     out = []
     for i in range(0, len(rows), batch_size):
-        texts = [r["text"] for r in rows[i:i + batch_size]]
-        enc = tok(texts, padding=True, truncation=True, max_length=max_len, return_tensors="pt").to(DEVICE)
+        texts = [r["text"] for r in rows[i : i + batch_size]]
+        enc = tok(
+            texts,
+            padding=True,
+            truncation=True,
+            max_length=max_len,
+            return_tensors="pt",
+        ).to(DEVICE)
         h = model(**enc).last_hidden_state
         if pooling == "cls":
             emb = h[:, 0]
