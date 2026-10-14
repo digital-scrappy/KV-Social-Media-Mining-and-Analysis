@@ -11,7 +11,6 @@ import argparse
 import common as C
 
 
-# ---------------- CONFIG (the only cell that differs per experiment) ----------------
 DEFAULTS = {
     "EXP_NAME": "image_A",
     "MODALITY": "image",
@@ -143,12 +142,6 @@ def main():
     # m[m.disagree].sort_values('gap', ascending=False).head(5)
 
 
-# CHANGED: config is now JSON instead of key=value lines (your requirement).
-# Values in the JSON override DEFAULTS, so a file only needs the keys that differ.
-# This also removes the use of the undefined `log`, and JSON keeps lists, floats
-# and booleans typed (the old parser would have returned everything as strings).
-
-
 def load_config(path):
     with open(path) as f:
         return {**DEFAULTS, **json.load(f)}
@@ -167,3 +160,5 @@ if __name__ == "__main__":
     cfg.setdefault("OUT_DIR", f"outputs/{cfg['EXP_NAME']}")
 
     globals().update(cfg)
+
+    main()
