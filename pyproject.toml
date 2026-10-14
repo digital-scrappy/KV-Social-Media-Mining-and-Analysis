@@ -4,4 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "ipywidgets>=8.1.9",
+    "jupyterlab>=4.6.4",
+    "numpy>=2.5.4",
+    "pandas>=3.0.6",
+    "pillow>=12.3.0",
+    "scikit-learn>=1.9.1",
+    "torch>=2.14.1",
+    "tqdm>=4.70.1",
+    "transformers>=5.19.0",
+]
