@@ -9,16 +9,16 @@
 
 
 # ---------------- CONFIG (the only cell that differs per experiment) ----------------
-EXP_NAME = "text_A"  # image_A | image_B | text_A | text_B
-MODALITY = "text"  # 'image' or 'text'
-MODEL_NAME = "google/embeddinggemma-2"  # exact HF checkpoint
+EXP_NAME = "image_A"  # image_A | image_B | text_A | text_B
+MODALITY = "image"  # 'image' or 'text'
+MODEL_NAME = "openai/clip-vit-base-patch32"  # exact HF checkpoint
 IMG_KIND = (
     "clip"  # image only: 'clip' (get_image_features) or 'cls' (CLS token, e.g. DINOv2)
 )
 POOLING = "mean"  # text only: 'mean' or 'cls'
-MAX_LEN = 8192  # text only: max tokens (truncation)
+MAX_LEN = 128  # text only: max tokens (truncation)
 
-DATA_DIR = "data/"  # folder containing train.jsonl, dev.jsonl, test.jsonl and img/
+DATA_DIR = "data"  # folder containing train.jsonl, dev.jsonl, test.jsonl and img/
 OUT_DIR = f"outputs/{EXP_NAME}"
 SEEDS = [0, 1, 2]  # same for ALL experiments
 GRID = {
@@ -27,7 +27,7 @@ GRID = {
     "bs": [64, 256],
 }  # same for ALL experiments
 EPOCHS = 100
-USE_TEST = False  # flip to True ONLY when the course protocol allows test evaluation
+USE_TEST = False
 
 
 # In[2]:
