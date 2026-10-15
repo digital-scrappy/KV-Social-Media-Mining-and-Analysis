@@ -81,6 +81,8 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
         inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
         if kind == "clip":
             emb = model.get_image_features(**inputs)
+        elif kind == "emb":
+            emb = model.encode([{"image": img} for img in imgs])
         else:
             emb = model(**inputs).last_hidden_state[:, 0]
         if not isinstance(emb, torch.Tensor):

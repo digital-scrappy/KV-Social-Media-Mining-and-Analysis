@@ -3,7 +3,7 @@
   "EXP_NAME": "img_embeddinggemma2",
   "MODALITY": "image",
   "MODEL_NAME": "google/embeddinggemma-2",
-  "IMG_KIND": "clip",
+  "IMG_KIND": "emb",
   "POOLING": "mean",
   "MAX_LEN": 8192,
   "DATA_DIR": "data",
