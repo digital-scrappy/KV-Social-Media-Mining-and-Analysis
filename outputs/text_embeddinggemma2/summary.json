@@ -1,0 +1,56 @@
+{
+  "exp": "text_embeddinggemma2",
+  "model": "google/embeddinggemma-2",
+  "modality": "text",
+  "emb_dim": 768,
+  "img_kind": null,
+  "pooling": "mean",
+  "max_len": 8192,
+  "optimizer": "Adam",
+  "epochs_max": 100,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "grid": {
+    "lr": [
+      0.0001,
+      0.001,
+      0.01
+    ],
+    "wd": [
+      0,
+      0.0001,
+      0.01
+    ],
+    "bs": [
+      64,
+      256
+    ]
+  },
+  "best_hparams": {
+    "lr": 0.001,
+    "wd": 0.01,
+    "bs": 64,
+    "val_auroc": 0.628112,
+    "best_epoch": 3
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "val_auroc": 0.628112,
+      "best_epoch": 3
+    },
+    {
+      "seed": 1,
+      "val_auroc": 0.626512,
+      "best_epoch": 25
+    },
+    {
+      "seed": 2,
+      "val_auroc": 0.6326879999999999,
+      "best_epoch": 0
+    }
+  ]
+}
