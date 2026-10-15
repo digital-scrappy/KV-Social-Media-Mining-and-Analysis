@@ -20,6 +20,7 @@ from transformers import (
     AutoModel,
     AutoTokenizer,
 )
+from sentence_transformers import SentenceTransformer
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -65,23 +66,34 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
     """kind: 'clip' -> CLIPModel.get_image_features (projected, e.g. 512-d)
              'cls'  -> AutoModel last_hidden_state[:, 0] (CLS token, e.g. DINOv2 768-d)
     Image pixels only; the processor does the required resize + normalization."""
-    proc = AutoImageProcessor.from_pretrained(model_name)
-    model = (
-        (CLIPModel if kind == "clip" else AutoModel)
-        .from_pretrained(model_name)
-        .to(DEVICE)
-        .eval()
-    )
+    if kind == "clip":
+        proc = AutoImageProcessor.from_pretrained(model_name)
+        model = CLIPModel.from_pretrained(model_name).to(DEVICE).eval()
+    elif kind == "emb":
+        proc = AutoImageProcessor.from_pretrained(model_name)
+        model = SentenceTransformer(model_name).to(DEVICE)
+    else:
+        proc = AutoImageProcessor.from_pretrained(model_name)
+        model = AutoModel.from_pretrained(model_name).to(DEVICE).eval()
     out = []
     for i in range(0, len(rows), batch_size):
         imgs = [
             Image.open(os.path.join(data_dir, r["img"])).convert("RGB")
             for r in rows[i : i + batch_size]
         ]
-        inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
         if kind == "clip":
+            inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
             emb = model.get_image_features(**inputs)
+        elif kind == "emb":
+            # SentenceTransformer handles preprocessing itself
+            emb = model.encode(
+                [{"image": im} for im in imgs],
+                batch_size=len(imgs),
+                convert_to_tensor=True,
+                normalize_embeddings=True,
+            )
         else:
+            inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
             emb = model(**inputs).last_hidden_state[:, 0]
         if not isinstance(emb, torch.Tensor):
             emb = emb.pooler_output
