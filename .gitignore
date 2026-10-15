@@ -5,13 +5,12 @@
 __pycache__/
 *.py[codz]
 *$py.class
-
+*.npy
 # C extensions
 *.so
 
 # Distribution / packaging
 data/*
-outputs/*
 .Python
 build/
 develop-eggs/
