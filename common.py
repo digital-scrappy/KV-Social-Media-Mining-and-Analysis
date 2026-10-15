@@ -71,7 +71,7 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
         model = CLIPModel.from_pretrained(mode_name).to(DEVICE).eval()
     if kind == "emb":
         proc = None
-        model = SentenceTransformer(model_name).to(DEVICE).eval()
+        model = SentenceTransformer(model_name).to(DEVICE)
     else:
         proc = AutoImageProcessor.from_pretrained(model_name)
         model = AutoModel.from_pretrained(mode_name).to(DEVICE).eval()
