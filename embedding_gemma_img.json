@@ -1,0 +1,18 @@
+
+{
+  "EXP_NAME": "img_embeddinggemma2",
+  "MODALITY": "image",
+  "MODEL_NAME": "google/embeddinggemma-2",
+  "IMG_KIND": "clip",
+  "POOLING": "mean",
+  "MAX_LEN": 8192,
+  "DATA_DIR": "data",
+  "SEEDS": [0, 1, 2],
+  "GRID": {
+    "lr": [0.0001, 0.001, 0.01],
+    "wd": [0, 0.0001, 0.01],
+    "bs": [64, 256]
+  },
+  "EPOCHS": 100,
+  "USE_TEST": false
+}
