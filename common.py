@@ -70,7 +70,7 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
         proc = AutoImageProcessor.from_pretrained(model_name)
         model = CLIPModel.from_pretrained(mode_name).to(DEVICE).eval()
     if kind == "emb":
-        proc = None
+        proc = AutoImageProcessor.from_pretrained(model_name)
         model = SentenceTransformer(model_name).to(DEVICE)
     else:
         proc = AutoImageProcessor.from_pretrained(model_name)
@@ -85,7 +85,8 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
             inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
             emb = model.get_image_features(**inputs)
         elif kind == "emb":
-            emb = model.encode([{"image": img.resize(240, 240)} for img in imgs])
+            inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
+            emb = model.encode([{"image": img} for img in inputs])
         else:
             inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
             emb = model(**inputs).last_hidden_state[:, 0]
