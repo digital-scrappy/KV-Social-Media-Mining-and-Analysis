@@ -19,8 +19,8 @@ from transformers import (
     CLIPModel,
     AutoModel,
     AutoTokenizer,
-    SentenceTransformer,
 )
+from sentence_transformers import SentenceTransformers
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
