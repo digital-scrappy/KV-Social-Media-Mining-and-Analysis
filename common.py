@@ -20,7 +20,7 @@ from transformers import (
     AutoModel,
     AutoTokenizer,
 )
-from sentence_transformers import SentenceTransformers
+from sentence_transformers import SentenceTransformer
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
