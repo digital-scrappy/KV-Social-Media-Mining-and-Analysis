@@ -1,0 +1,56 @@
+{
+  "exp": "text_mpnet",
+  "model": "sentence-transformers/all-mpnet-base-v2",
+  "modality": "text",
+  "emb_dim": 768,
+  "img_kind": null,
+  "pooling": "mean",
+  "max_len": 128,
+  "optimizer": "Adam",
+  "epochs_max": 100,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "grid": {
+    "lr": [
+      0.0001,
+      0.001,
+      0.01
+    ],
+    "wd": [
+      0,
+      0.0001,
+      0.01
+    ],
+    "bs": [
+      64,
+      256
+    ]
+  },
+  "best_hparams": {
+    "lr": 0.001,
+    "wd": 0.01,
+    "bs": 64,
+    "val_auroc": 0.6357520000000001,
+    "best_epoch": 7
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "val_auroc": 0.6357520000000001,
+      "best_epoch": 7
+    },
+    {
+      "seed": 1,
+      "val_auroc": 0.6332959999999999,
+      "best_epoch": 21
+    },
+    {
+      "seed": 2,
+      "val_auroc": 0.6393359999999999,
+      "best_epoch": 7
+    }
+  ]
+}

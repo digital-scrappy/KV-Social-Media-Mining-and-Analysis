@@ -112,7 +112,7 @@ def main():
             "modality": MODALITY,
             "emb_dim": int(EMB_DIM),
             "img_kind": IMG_KIND if MODALITY == "image" else None,
-            "pooling": POOLING if MODALITY == "text" else None,
+            "pooling": POOLING if MODALITY == "text" else ("cls+projection" if IMG_KIND == "clip" else "cls"),
             "max_len": MAX_LEN if MODALITY == "text" else None,
             "optimizer": "Adam",
             "epochs_max": EPOCHS,
