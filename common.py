@@ -66,12 +66,12 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
              'cls'  -> AutoModel last_hidden_state[:, 0] (CLS token, e.g. DINOv2 768-d)
     Image pixels only; the processor does the required resize + normalization."""
     proc = AutoImageProcessor.from_pretrained(model_name)
-    model = (
-        (CLIPModel if kind == "clip" else AutoModel)
-        .from_pretrained(model_name)
-        .to(DEVICE)
-        .eval()
-    )
+    if kind == "clip":
+        model = CLIPModel.from_pretrained(mode_name).to(DEVICE).eval()
+    if kind = "emb":
+        model = SentenceTransformer(model_name).to(DEVICE).eval()
+    else:
+        model = AutoModel.from_pretrained(mode_name).to(DEVICE).eval()
     out = []
     for i in range(0, len(rows), batch_size):
         imgs = [
@@ -82,7 +82,7 @@ def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
         if kind == "clip":
             emb = model.get_image_features(**inputs)
         elif kind == "emb":
-            emb = model.encode([{"image": img} for img in imgs])
+            emb = model.encode([{"image": img} for img in inputs])
         else:
             emb = model(**inputs).last_hidden_state[:, 0]
         if not isinstance(emb, torch.Tensor):
