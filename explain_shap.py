@@ -14,7 +14,7 @@ exp = "outputs/img_embeddinggemma2"
 cfg = json.load(open(f"{exp}/summary.json"))
 scorer = C.ImageScorer(exp, cfg["model"], cfg["img_kind"])
 
-img_ids = ["54206", "79042", "73914", "74058", "02568"]
+img_ids = ["54206.png", "79042.png", "73914.png", "74058.png", "02568.png"]
 
 # id -> image path, taken from the data itself (avoids zero-padding issues)
 dev = {int(r["id"]): r["img"] for r in C.load_split(DATA_DIR, "dev")}
