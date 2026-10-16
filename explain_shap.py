@@ -17,7 +17,6 @@ scorer = C.ImageScorer(exp, cfg["model"], cfg["img_kind"])
 img_ids = ["54206.png", "79042.png", "73914.png", "74058.png", "02568.png"]
 
 # id -> image path, taken from the data itself (avoids zero-padding issues)
-dev = {int(r["id"]): r["img"] for r in C.load_split(DATA_DIR, "dev")}
 
 
 def load_224(path):
@@ -28,10 +27,10 @@ def load_224(path):
     return np.array(im.crop((l, t, l + 224, t + 224)))
 
 
-imgs = np.stack([load_224(os.path.join(DATA_DIR, dev[i])) for i in img_ids])
+imgs = np.stack([load_224(os.path.join(DATA_DIR, "img", f)) for f in img_ids])
 
 masker = shap.maskers.Image("blur(32,32)", imgs[0].shape)
-explainer = shap.Explainer(scorer, masker, output_names=["hateful logit"])
+explainer = shap.Explainer(scorer, masker)
 sv = explainer(imgs, max_evals=1000, batch_size=50)
 
 os.makedirs(f"{exp}/shap", exist_ok=True)
