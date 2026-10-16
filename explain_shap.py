@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import json, os
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import shap
 import matplotlib
 
@@ -11,30 +14,39 @@ import common as C
 
 DATA_DIR = "data"
 exp = "outputs/img_embeddinggemma2"
+out_dir = f"{exp}/shap"
+os.makedirs(out_dir, exist_ok=True)
+
 cfg = json.load(open(f"{exp}/summary.json"))
 scorer = C.ImageScorer(exp, cfg["model"], cfg["img_kind"])
 
-img_ids = ["54206.png", "79042.png", "73914.png", "74058.png", "02568.png"]
+img_files = ["54206.png", "79042.png", "73914.png", "74058.png", "02568.png"]
 
-# id -> image path, taken from the data itself (avoids zero-padding issues)
-
-
-def load_224(path):
-    im = Image.open(path).convert("RGB")
-    s = 224 / min(im.size)
-    im = im.resize((round(im.width * s), round(im.height * s)), Image.BICUBIC)
-    l, t = (im.width - 224) // 2, (im.height - 224) // 2
-    return np.array(im.crop((l, t, l + 224, t + 224)))
+# val_scores.csv for the sanity check (seed-0 probe, same as the scorer)
+val = pd.read_csv(f"{exp}/val_scores.csv").set_index("id")
+logit = lambda p: float(np.log(p / (1 - p)))
 
 
-imgs = np.stack([load_224(os.path.join(DATA_DIR, "img", f)) for f in img_ids])
+def load_native(fname):
+    """Full image, no crop/resize: the model's own processor handles resizing."""
+    im = Image.open(os.path.join(DATA_DIR, "img", fname)).convert("RGB")
+    return np.array(im)
 
-masker = shap.maskers.Image("blur(32,32)", imgs[0].shape)
-explainer = shap.Explainer(scorer, masker)
-sv = explainer(imgs, max_evals=1000, batch_size=50)
 
-os.makedirs(f"{exp}/shap", exist_ok=True)
-for k, i in enumerate(img_ids):
-    shap.image_plot(sv[k : k + 1], show=False)
-    plt.savefig(f"{exp}/shap/{i}.png", dpi=150, bbox_inches="tight")
+for f in img_files:
+    stem = Path(f).stem
+    arr = load_native(f)
+
+    # sanity check: scorer on the native image should match val_scores.csv
+    out = float(scorer(arr[None])[0])
+    ref = logit(val.loc[int(stem), "score"]) if int(stem) in val.index else float("nan")
+    print(f"{stem}: shape={arr.shape}  scorer logit={out:.3f}  csv logit={ref:.3f}")
+
+    masker = shap.maskers.Image("blur(64,64)", arr.shape)
+    explainer = shap.Explainer(scorer, masker)
+    sv = explainer(arr[None], max_evals=1000, batch_size=50)
+
+    shap.image_plot(sv, show=False)
+    plt.savefig(f"{out_dir}/{stem}.png", dpi=150, bbox_inches="tight")
     plt.close("all")
+    print(f"saved {out_dir}/{stem}.png")
