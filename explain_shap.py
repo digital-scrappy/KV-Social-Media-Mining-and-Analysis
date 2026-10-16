@@ -19,7 +19,6 @@ def load_224(path):
     return np.array(im.crop((l, t, l + 224, t + 224)))
 
 
-img = load_224("data/img/12345.png")
 imgs = [load_224("data/img/{i}.png") for i in img_ids]
 masker = shap.maskers.Image("blur(32,32)", img.shape)
 explainer = shap.Explainer(scorer, masker, output_names=["hateful logit"])
