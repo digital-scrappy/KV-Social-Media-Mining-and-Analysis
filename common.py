@@ -60,44 +60,74 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
 
 
+class ImageScorer:
+    def __init__(self, exp_dir, model_name, kind, seed=0, chunk=64):
+        self.enc = ImageEncoder(model_name, kind)
+        sc = np.load(f"{exp_dir}/scaler.npz")
+        self.mu, self.sd = sc["mu"], sc["sd"]
+        self.probe = LinearProbe(self.mu.shape[1]).to(DEVICE)
+        self.probe.load_state_dict(torch.load(f"{exp_dir}/classifier_seed{seed}.pt"))
+        self.probe.eval()
+        self.chunk = chunk
+
+    @torch.no_grad()
+    def __call__(self, arr):
+        outs = []
+        for i in range(0, len(arr), self.chunk):
+            imgs = [
+                Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+                for a in arr[i : i + self.chunk]
+            ]
+            x = (self.enc(imgs).numpy() - self.mu) / self.sd
+            x = torch.as_tensor(x, dtype=torch.float32).to(DEVICE)
+            outs.append(self.probe(x).cpu())
+        return torch.cat(outs).numpy()
+
+
 # ------------------------------------------------------- EXTRACTING EMBEDDINGS
-@torch.no_grad()
-def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
-    """kind: 'clip' -> CLIPModel.get_image_features (projected, e.g. 512-d)
-             'cls'  -> AutoModel last_hidden_state[:, 0] (CLS token, e.g. DINOv2 768-d)
-    Image pixels only; the processor does the required resize + normalization."""
-    if kind == "clip":
-        proc = AutoImageProcessor.from_pretrained(model_name)
-        model = CLIPModel.from_pretrained(model_name).to(DEVICE).eval()
-    elif kind == "emb":
-        proc = AutoImageProcessor.from_pretrained(model_name)
-        model = SentenceTransformer(model_name).to(DEVICE)
-    else:
-        proc = AutoImageProcessor.from_pretrained(model_name)
-        model = AutoModel.from_pretrained(model_name).to(DEVICE).eval()
-    out = []
-    for i in range(0, len(rows), batch_size):
-        imgs = [
-            Image.open(os.path.join(data_dir, r["img"])).convert("RGB")
-            for r in rows[i : i + batch_size]
-        ]
+class ImageEncoder:
+    def __init__(self, model_name, kind):
+        self.kind = kind
         if kind == "clip":
-            inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
-            emb = model.get_image_features(**inputs)
+            self.proc = AutoImageProcessor.from_pretrained(model_name)
+            self.model = CLIPModel.from_pretrained(model_name).to(DEVICE).eval()
         elif kind == "emb":
-            # SentenceTransformer handles preprocessing itself
-            emb = model.encode(
+            self.model = SentenceTransformer(model_name).to(DEVICE)
+        else:
+            self.proc = AutoImageProcessor.from_pretrained(model_name)
+            self.model = AutoModel.from_pretrained(model_name).to(DEVICE).eval()
+
+    @torch.no_grad()
+    def __call__(self, imgs):
+        if self.kind == "clip":
+            emb = self.model.get_image_features(
+                **self.proc(images=imgs, return_tensors="pt").to(DEVICE)
+            )
+        elif self.kind == "emb":
+            emb = self.model.encode(
                 [{"image": im} for im in imgs],
                 batch_size=len(imgs),
                 convert_to_tensor=True,
                 normalize_embeddings=True,
             )
         else:
-            inputs = proc(images=imgs, return_tensors="pt").to(DEVICE)
-            emb = model(**inputs).last_hidden_state[:, 0]
+            emb = self.model(
+                **self.proc(images=imgs, return_tensors="pt").to(DEVICE)
+            ).last_hidden_state[:, 0]
         if not isinstance(emb, torch.Tensor):
             emb = emb.pooler_output
-        out.append(emb.float().cpu())
+        return emb.float().cpu()
+
+
+def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
+    enc = ImageEncoder(model_name, kind)
+    out = []
+    for i in range(0, len(rows), batch_size):
+        imgs = [
+            Image.open(os.path.join(data_dir, r["img"])).convert("RGB")
+            for r in rows[i : i + batch_size]
+        ]
+        out.append(enc(imgs))
     return torch.cat(out).numpy()
 
 

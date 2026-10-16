@@ -67,6 +67,11 @@ def main():
 
     # In[ ]:
 
+    np.savez(
+        f"{OUT_DIR}/scaler.npz",
+        mu=emb["train"].mean(0, keepdims=True),
+        sd=emb["train"].std(0, keepdims=True) + 1e-8,
+    )
     # ---------------- 3. Hyperparameter search (validation AUROC, seed = SEEDS[0]) ----------------
     search = C.grid_search(Xtr, ytr, Xva, yva, GRID, seed=SEEDS[0], epochs=EPOCHS)
     pd.DataFrame(search).to_csv(f"{OUT_DIR}/grid_search.csv", index=False)
@@ -112,7 +117,9 @@ def main():
             "modality": MODALITY,
             "emb_dim": int(EMB_DIM),
             "img_kind": IMG_KIND if MODALITY == "image" else None,
-            "pooling": POOLING if MODALITY == "text" else ("cls+projection" if IMG_KIND == "clip" else "cls"),
+            "pooling": POOLING
+            if MODALITY == "text"
+            else ("cls+projection" if IMG_KIND == "clip" else "cls"),
             "max_len": MAX_LEN if MODALITY == "text" else None,
             "optimizer": "Adam",
             "epochs_max": EPOCHS,
