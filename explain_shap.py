@@ -4,7 +4,7 @@ import shap, json, numpy as np
 from PIL import Image
 import common as C
 
-exp = "outputs/image_A"
+exp = "outputs/img_embeddinggemma2"
 cfg = json.load(open(f"{exp}/summary.json"))
 scorer = C.ImageScorer(exp, cfg["model"], cfg["img_kind"])
 
