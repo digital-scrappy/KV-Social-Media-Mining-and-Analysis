@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\begin{tabular}{llc}
+\toprule
+Modality & Encoder & Val AUROC \\
+\midrule
+Image & \texttt{embeddinggemma-2} & \textbf{0.699 $\pm$ 0.005} \\
+Image & \texttt{clip-vit-base-patch32} & 0.644 $\pm$ 0.001 \\
+\midrule
+Text & \texttt{all-mpnet-base-v2} & \textbf{0.636 $\pm$ 0.002} \\
+Text & \texttt{embeddinggemma-2} & 0.629 $\pm$ 0.003 \\
+\bottomrule
+\end{tabular}
+\caption{AUROC (mean $\pm$ std over 3 seeds) of the linear probe on each frozen encoder. Best encoder per modality in bold.}
+\label{tab:results}
+\end{table}
