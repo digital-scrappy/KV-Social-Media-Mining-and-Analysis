@@ -1,5 +1,4 @@
 # KV-Social-Media-Mining-and-Analysis
-## Models
 - All requirements are defined in the `pyproject.toml` and our exact package versions can be found in the `uv.lock` file.
 - Models and training runs are configured using their respective *.jsons.
 - The classifiers are trained using `uv run baseline.py <json-path>`.
