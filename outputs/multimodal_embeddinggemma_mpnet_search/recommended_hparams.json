@@ -1,0 +1,7 @@
+{
+  "LR": 0.001,
+  "WEIGHT_DECAY": 0.0,
+  "BATCH_SIZE": 64,
+  "COMMON_DIM": 1024,
+  "LAMBDA_OP": 0.0
+}

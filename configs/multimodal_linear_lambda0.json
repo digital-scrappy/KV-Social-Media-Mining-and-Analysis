@@ -1,0 +1,26 @@
+{
+  "EXP_NAME": "multimodal_linear_lambda0",
+  "MODALITY": "multimodal",
+  "DATA_DIR": "data/",
+  "BATCH_SIZE": 64,
+  "SEEDS": [
+    0,
+    1,
+    2
+  ],
+  "IMG_MODEL": "google/embeddinggemma-2",
+  "IMG_KIND": "emb",
+  "TEXT_MODEL": "sentence-transformers/all-mpnet-base-v2",
+  "POOLING": "mean",
+  "MAX_LEN": 128,
+  "COMMON_DIM": 768,
+  "FUSION": "linear",
+  "DROPOUT": 0.5,
+  "LR": 0.01,
+  "WEIGHT_DECAY": 0,
+  "EPOCHS": 100,
+  "PATIENCE": 5,
+  "LAMBDA_OP": 0.0,
+  "OUTPUT_DIR": "outputs/multimodal_linear_lambda0",
+  "NUM_WORKERS": 0
+}

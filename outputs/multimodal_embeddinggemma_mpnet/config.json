@@ -1,0 +1,48 @@
+{
+  "EXP_NAME": "multimodal_embeddinggemma_mpnet",
+  "MODALITY": "multimodal",
+  "DATA_DIR": "data/",
+  "BATCH_SIZE": 64,
+  "USE_TEST": false,
+  "SEEDS": [
+    0,
+    1,
+    2
+  ],
+  "IMG_MODEL": "google/embeddinggemma-2",
+  "IMG_KIND": "emb",
+  "TEXT_MODEL": "sentence-transformers/all-mpnet-base-v2",
+  "POOLING": "mean",
+  "MAX_LEN": 128,
+  "COMMON_DIM": 1024,
+  "FUSION": "gated",
+  "LR": 0.001,
+  "WEIGHT_DECAY": 0.0,
+  "EPOCHS": 100,
+  "PATIENCE": 5,
+  "LAMBDA_OP": 0.1,
+  "GRID": {
+    "lr": [
+      0.0001,
+      0.001,
+      0.01
+    ],
+    "wd": [
+      0,
+      0.0001,
+      0.01
+    ],
+    "bs": [
+      64,
+      256
+    ],
+    "common_dim": [
+      256,
+      512,
+      768,
+      1024
+    ]
+  },
+  "OUTPUT_DIR": "outputs/multimodal_embeddinggemma_mpnet",
+  "NUM_WORKERS": 0
+}

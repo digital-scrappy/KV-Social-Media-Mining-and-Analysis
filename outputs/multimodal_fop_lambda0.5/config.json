@@ -1,0 +1,21 @@
+{
+  "EXP_NAME": "multimodal_fop_lambda0.5",
+  "MODALITY": "multimodal",
+  "DATA_DIR": "data/",
+  "BATCH_SIZE": 32,
+  "USE_TEST": false,
+  "IMG_MODEL": "openai/clip-vit-base-patch32",
+  "IMG_KIND": "clip",
+  "TEXT_MODEL": "bert-base-uncased",
+  "POOLING": "mean",
+  "COMMON_DIM": 512,
+  "IMG_DIM": 512,
+  "TEXT_DIM": 768,
+  "LR": 0.0001,
+  "WEIGHT_DECAY": 0.01,
+  "EPOCHS": 2,
+  "PATIENCE": 5,
+  "LAMBDA_OP": 0.5,
+  "OUTPUT_DIR": "outputs/multimodal_fop_lambda0.5",
+  "NUM_WORKERS": 4
+}

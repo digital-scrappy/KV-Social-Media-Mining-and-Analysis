@@ -1,0 +1,28 @@
+{
+  "exp": "multimodal_gated_lambda0",
+  "model": "google/embeddinggemma-2+sentence-transformers/all-mpnet-base-v2",
+  "modality": "multimodal",
+  "fusion": "gated",
+  "lambda_op": 0.0,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "per_seed": [
+    {
+      "seed": 0,
+      "val_auroc": 0.7495359999999999
+    },
+    {
+      "seed": 1,
+      "val_auroc": 0.7384959999999998
+    },
+    {
+      "seed": 2,
+      "val_auroc": 0.726208
+    }
+  ],
+  "val_auroc_mean": 0.7380799999999997,
+  "val_auroc_std": 0.009528157849238186
+}

@@ -1,11 +1,14 @@
 # MacOS
 .DS_Store
 
+*.npz
+*.zip
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class
 *.npy
+*.pt
 # C extensions
 *.so
 
