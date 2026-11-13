@@ -4,6 +4,9 @@
   "modality": "multimodal",
   "fusion": "gated",
   "lambda_op": 0.1,
+  "common_dim": 1024,
+  "dropout": 0.5,
+  "trainable_params": 4728834,
   "seeds": [
     0,
     1,
@@ -12,17 +15,20 @@
   "per_seed": [
     {
       "seed": 0,
-      "val_auroc": 0.7369600000000001
+      "val_auroc": 0.757152,
+      "trainable_params": 4728834
     },
     {
       "seed": 1,
-      "val_auroc": 0.735696
+      "val_auroc": 0.7559039999999999,
+      "trainable_params": 4728834
     },
     {
       "seed": 2,
-      "val_auroc": 0.722896
+      "val_auroc": 0.7461279999999999,
+      "trainable_params": 4728834
     }
   ],
-  "val_auroc_mean": 0.7318506666666668,
-  "val_auroc_std": 0.00635289778150275
+  "val_auroc_mean": 0.7530613333333332,
+  "val_auroc_std": 0.004929009997510247
 }

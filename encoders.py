@@ -4,6 +4,7 @@ import os
 import torch
 import torch.nn as nn
 from PIL import Image
+from tqdm import tqdm
 
 from transformers import (
     AutoImageProcessor,
@@ -75,12 +76,12 @@ class TextEncoder(nn.Module):
         return ((h * m).sum(1) / m.sum(1).clamp(min=1)).float()
 
 
-def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=64):
+def extract_image_embeddings(rows, data_dir, model_name, kind, batch_size=8):
     """One embedding per row (same order), via a frozen ImageEncoder. Run once; the
     caller is responsible for caching the result to disk."""
     enc = ImageEncoder(model_name, kind)
     out = []
-    for i in range(0, len(rows), batch_size):
+    for i in tqdm(range(0, len(rows), batch_size), desc="Image embeddings"):
         imgs = [
             Image.open(os.path.join(data_dir, r["img"])).convert("RGB")
             for r in rows[i : i + batch_size]
@@ -94,7 +95,7 @@ def extract_text_embeddings(rows, model_name, pooling="mean", max_len=128, batch
     caller is responsible for caching the result to disk."""
     enc = TextEncoder(model_name, pooling, max_len)
     out = []
-    for i in range(0, len(rows), batch_size):
+    for i in tqdm(range(0, len(rows), batch_size), desc="Text embeddings"):
         texts = [r["text"] for r in rows[i : i + batch_size]]
         out.append(enc(texts).cpu())
     return torch.cat(out).numpy()

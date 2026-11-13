@@ -1,16 +1,20 @@
 \begin{table}[t]
 \centering
-\begin{tabular}{llc}
+\begin{tabular}{llrcc}
 \toprule
-Modality & Encoder & Val AUROC \\
+Modality & Model & Trainable params & Val AUROC & $\Delta$ vs best unimodal \\
 \midrule
-Image & \texttt{embeddinggemma-2} & \textbf{0.699 $\pm$ 0.005} \\
-Image & \texttt{clip-vit-base-patch32} & 0.644 $\pm$ 0.001 \\
+Image & \texttt{embeddinggemma-2} & 769 & \textbf{0.699 $\pm$ 0.005} & -- \\
+Image & \texttt{clip-vit-base-patch32} & 513 & 0.644 $\pm$ 0.001 & -- \\
 \midrule
-Text & \texttt{all-mpnet-base-v2} & \textbf{0.636 $\pm$ 0.002} \\
-Text & \texttt{embeddinggemma-2} & 0.629 $\pm$ 0.003 \\
+Text & \texttt{all-mpnet-base-v2} & 769 & \textbf{0.636 $\pm$ 0.002} & -- \\
+Text & \texttt{embeddinggemma-2} & 769 & 0.629 $\pm$ 0.003 & -- \\
+\midrule
+Multimodal & gated + OP ($\lambda$=0.1) & 4,728,834 & \textbf{0.753 $\pm$ 0.005} & +0.054 \\
+Multimodal & gated ($\lambda$=0) & 4,728,834 & 0.749 $\pm$ 0.002 & +0.050 \\
+Multimodal & linear ($\lambda$=0) & 1,581,060 & 0.743 $\pm$ 0.001 & +0.044 \\
 \bottomrule
 \end{tabular}
-\caption{AUROC (mean $\pm$ std over 3 seeds) of the linear probe on each frozen encoder. Best encoder per modality in bold.}
+\caption{Validation AUROC (mean $\pm$ std over 3 seeds). Image and text rows are the Assignment 1 baselines (linear probes); multimodal rows use EmbeddingGemma~2 (image) and all-mpnet-base-v2 (text). $\Delta$ is the absolute AUROC gain over the best unimodal mean. Best run per modality in bold.}
 \label{tab:results}
 \end{table}
